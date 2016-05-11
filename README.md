@@ -8,7 +8,8 @@ Limitations:
    * raises error if there is a name conflict with reserved words
    * reserves the prefix \f$\f for internal use (also raises error)
 
-There are simpler ways of doing this, but this is the most functional imho.
+There are more elegant implementations to do similar things, but this
+has better functionality and is more robust, imho.
 
 Allows:
 
