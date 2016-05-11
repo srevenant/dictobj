@@ -51,7 +51,10 @@ class DictObj(object):
                 setattr(self, '..old_key..' + newkey, key)
 
     def dict(self):
-        """Return original dictionary form"""
+        """
+        Return original dictionary form, not rewritten keys
+        Alternate to self.export()
+        """
         rewrite = {}
         exported = {}
         for key in self.__dict__:
@@ -69,15 +72,19 @@ class DictObj(object):
         return exported
 
     def __repr__(self):
-        return str(self.__repr__r())
+        return str(self.export())
 
-    def __repr__r(self):
+    def export(self):
+        """
+        Export using rewritten keys, not original keys
+        Alternate to self.dict()
+        """
         exported = {}
         for key in self.__dict__:
             if key[:11] != "..old_key..":
                 value = self.__dict__[key]
                 if isinstance(value, DictObj):
-                    value = value.__repr__r()
+                    value = value.export()
                 exported[key] = value
         return exported
 
