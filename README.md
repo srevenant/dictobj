@@ -15,9 +15,12 @@ has better functionality and is more robust, imho.
 
 Allows:
 
-    >>> test_obj = DictObj(counter=0, array=[])
-    >>> test_obj
+    >>> obj = DictObj(counter=0, array=[])
+    >>> obj
     {'counter': 0, 'array': []}
+    >>> obj.counter += 1
+    >>> obj.counter
+    1
 
     >>> test_dict = {"a":{"b":1,"ugly var!":2}, "c":3}
     >>> test_obj = DictObj(**test_dict)
