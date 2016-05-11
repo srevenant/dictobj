@@ -22,33 +22,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import re
 import copy
 
-class DictObj(object):
+class DictObj(dict):
     """
     Represent a dictionary in object form.  Recursive.
 
-    Allows:
+    Not pythonic because it provides an alternate way to use dictionaries.
+    But I'm okay with this, becuase it is handy.
 
+    Limitations:
+
+       * raises error if there is a name conflict with reserved words
+       * reserves the prefix \f$\f for internal use (also raises error)
+
+    There are simpler ways of doing this, but this is the most functional imho.
+
+    >>> test_dict = {"\f$\fbogus":1}
+    >>> test_obj = DictObj(**test_dict) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+     ...
+    ValueError: Key may not begin with \\f$\\f
+    >>> test_obj = DictObj(copy='test') # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+     ...
+    ValueError: Key 'copy' conflicts with reserved word
     >>> test_dict = {"a":{"b":1,"ugly var!":2}, "c":3}
     >>> test_obj = DictObj(**test_dict)
-    >>> print(test_obj.a.b)
+    >>> orig_obj = test_obj.copy() # test this later
+    >>> test_obj.keys()
+    ['a', 'c']
+    >>> 'a' in test_obj
+    True
+    >>> for key in test_obj:
+    ...     key
+    'a'
+    'c'
+    >>> test_obj.get('c')
+    3
+    >>> test_obj['c']
+    3
+    >>> test_obj.c
+    3
+    >>> test_obj.c = 4
+    >>> test_obj.c
+    4
+    >>> test_obj.a.b
     1
-    >>> print(test_obj.a.ugly_var_)
+    >>> test_obj.a.ugly_var_
     2
-    >>> print(test_obj)
-    {'a': {'b': 1, 'ugly_var_': 2}, 'c': 3}
-    >>> print(test_obj.dict()) # "ugly var!" is back
+    >>> test_obj.a['ugly var!']
+    2
+    >>> test_obj
+    {'a': {'b': 1, 'ugly var!': 2, 'ugly_var_': 2}, 'c': 4}
+    >>> test_obj.dict() # "ugly var!" is back
+    {'a': {'b': 1, 'ugly var!': 2}, 'c': 4}
+    >>> test_obj.a.ugly_var_ = 10
+    >>> test_obj.a.ugly_var_
+    10
+    >>> orig_obj.dict()
     {'a': {'b': 1, 'ugly var!': 2}, 'c': 3}
     """
 
+    __reserved__ = set(dir(dict) + ['dict', '__init__', '__repr__','export', '__iter__', '__contains__', 'copy', '__reserved__'])
+
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+
     def __init__(self, **attrs):
         for key in attrs:
+            if key[:3] == '\f$\f':
+                raise ValueError("Key may not begin with \\f$\\f")
             newkey = re.sub(r'[^a-zA-Z0-9_]', '_', key)
+            if newkey in self.__reserved__:
+                raise ValueError("Key '{}' conflicts with reserved word".format(newkey))
+
             value = attrs[key]
-            if isinstance(value, dict):
+            if isinstance(value, dict) or isinstance(value, DictObj):
                 value = DictObj(**value)
             setattr(self, newkey, value)
-            if newkey != key:
-                setattr(self, '..old_key..' + newkey, key)
+            if newkey != key: # set both
+                setattr(self, '\f$\f' + newkey, key)
+                setattr(self, key, value)
 
     def dict(self):
         """
@@ -57,11 +110,11 @@ class DictObj(object):
         """
         rewrite = {}
         exported = {}
-        for key in self.__dict__:
-            if key[:11] == "..old_key..":
-                rewrite[key[11:]] = self.__dict__[key]
+        for key in self:
+            if key[:3] == '\f$\f':
+                rewrite[key[3:]] = self[key]
             else:
-                value = self.__dict__[key]
+                value = self[key]
                 if isinstance(value, DictObj):
                     value = value.dict()
                 exported[key] = value
@@ -80,21 +133,14 @@ class DictObj(object):
         Alternate to self.dict()
         """
         exported = {}
-        for key in self.__dict__:
-            if key[:11] != "..old_key..":
-                value = self.__dict__[key]
+        for key in self:
+            if key[:3] != "\f$\f":
+                value = self[key]
                 if isinstance(value, DictObj):
                     value = value.export()
                 exported[key] = value
         return exported
 
-    def __iter__(self):
-        return iter(self.__dict__)
-
-    def __contains__(self, item):
-        return item in self.__dict__
-
     def copy(self):
-        """Make a copy"""
-        return copy.deepcopy(self.__dict__)
+        return DictObj(**self.dict())
 
