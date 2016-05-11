@@ -7,6 +7,8 @@ Limitations:
 
    * raises error if there is a name conflict with reserved words
    * reserves the prefix \f$\f for internal use (also raises error)
+   * because of namespace conflict problems, this is a deal breaker
+     for universal use--you must be cautious on what keys are input.
 
 There are more elegant implementations to do similar things, but this
 has better functionality and is more robust, imho.
