@@ -87,5 +87,7 @@ class DictObj(object):
     def __contains__(self, item):
         return item in self.__dict__
 
-    def __copy__(self):
+    def copy(self):
+        """Make a copy"""
         return copy.deepcopy(self.__dict__)
+
