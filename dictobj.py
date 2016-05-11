@@ -86,6 +86,7 @@ class DictObj(dict):
     """
 
     __reserved__ = set(dir(dict) + ['dict', '__init__', '__repr__','export', '__iter__', '__contains__', 'copy', '__reserved__'])
+    __version__ = 1.0
 
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
