@@ -20,7 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import re
-import copy
+
+__version__ = 1.0
 
 class DictObj(dict):
     """
@@ -85,12 +86,14 @@ class DictObj(dict):
     {'a': {'b': 1, 'ugly var!': 2}, 'c': 3}
     """
 
-    __reserved__ = set(dir(dict) + ['dict', '__init__', '__repr__','export', '__iter__', '__contains__', 'copy', '__reserved__'])
-    __version__ = 1.0
+    __reserved__ = set(dir(dict) + ['dict', '__init__', '__repr__', 'export',
+                                    '__iter__', '__contains__', 'copy',
+                                    '__reserved__'])
 
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
 
+    # pylint: disable=super-init-not-called
     def __init__(self, **attrs):
         for key in attrs:
             if key[:3] == '\f$\f':
