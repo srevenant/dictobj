@@ -27,7 +27,7 @@ class DictObj(dict):
     """
     Represent a dictionary in object form.  Recursive.
 
-    Not pythonic because it provides an alternate way to use dictionaries.
+    Not python zen because it provides an alternate way to use dictionaries.
     But I'm okay with this, becuase it is handy.
 
     Limitations:
